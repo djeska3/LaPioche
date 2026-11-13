@@ -7,6 +7,7 @@ struct GameController: RouteCollection {
         games.get(use: index)
         games.post(use: create)
         games.get(":gameID", use: show)
+        games.put(":gameID", use: update)
     }
 
     @Sendable
@@ -46,4 +47,35 @@ struct GameController: RouteCollection {
         }
         return game
     }
+    
+    @Sendable
+    func update(req: Request) async throws -> CreateGameDTO {
+           guard let id = req.parameters.get("gameID", as: UUID.self)
+           else {
+               throw Abort(.badRequest, reason: "ID isn't correct")
+           }
+           guard let game = try await Game.find(id, on: req.db)
+           else {
+               throw Abort(.notFound, reason: "Game doesn't exist")
+           }
+           
+           let gameUpdateDTO = try req.content.decode(CreateGameDTO.self)
+        guard !gameUpdateDTO.title.isEmpty else {
+            throw Abort(.badRequest, reason: "Title is empty")
+        }
+        guard gameUpdateDTO.minPlayers <= gameUpdateDTO.maxPlayers else {
+            throw Abort(.badRequest, reason: "Min. players needs to be lower or equal to maxPlayers.")
+        }
+        guard gameUpdateDTO.durationMinutes > 0 else {
+            throw Abort(.badRequest, reason: "Duration need to be higher than 0.")
+        }
+           
+        game.title = gameUpdateDTO.title
+        game.minPlayers = gameUpdateDTO.minPlayers
+        game.maxPlayers = gameUpdateDTO.maxPlayers
+        game.durationMinutes = gameUpdateDTO.durationMinutes
+        
+           try await game.update(on: req.db)
+           return gameUpdateDTO
+       }
 }
