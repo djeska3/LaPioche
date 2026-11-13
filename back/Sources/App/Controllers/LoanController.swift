@@ -26,6 +26,6 @@ struct LoanController: RouteCollection {
             dueAt: try Loan.dueDate(from: now)
         )
         try await loan.save(on: req.db)
-        return try await loan.toDTO().encodeResponse(status: .created, for: req)
+        return try await loan.toDTO().encodeResponse(status: .conflict, for: req)
     }
 }
