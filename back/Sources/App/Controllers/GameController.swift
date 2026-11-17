@@ -78,4 +78,5 @@ struct GameController: RouteCollection {
            try await game.update(on: req.db)
            return gameUpdateDTO
        }
+    
 }
