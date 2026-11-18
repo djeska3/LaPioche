@@ -3,7 +3,7 @@ import Vapor
 
 final class Loan: Model, @unchecked Sendable {
     static let schema = "loans"
-    static let durationInDays = 13
+    static let durationInDays = 14
 
     @ID(key: .id)
     var id: UUID?
